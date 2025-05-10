@@ -1,0 +1,8 @@
+A api deve fazer o download dos links diretos do youtube, no maximo sera possivel fazer 10 downloads por dia, tera uma pagina para 
+fazer uma conta e se cadastrar, assim tendo acesso a quantos downloads quiser por dia
+
+node.js (backend)
+cucumber.js (para BDD)
+Espress (API reset)
+yt-dlp (para download dos videos)
+ffmpeg (para conversão dos videos)
