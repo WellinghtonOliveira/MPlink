@@ -5,6 +5,7 @@ const ffmpeg = require('fluent-ffmpeg')
 const path = require('path')
 const { type } = require('os')
 const { rejects } = require('assert')
+const { resolveCaa } = require('dns')
 
 if (!fs.existsSync('downloads')) {
     fs.mkdirSync('downloads')
@@ -47,7 +48,37 @@ async function baixarAudio(link, index) {
         console.log(`Baixando: ${title}`)
 
         await new Promise((resolve, reject) => {
-
+            const stream = ytdl(linkSync, { quality: 'highestaudio' })
+            ffmpeg(stream)
+            .audioBitrate(192)
+            .save(filePath)
+            .on('end', () => {
+                console.clear()
+                console.log(`Finalizado: ${filePath}`)
+                resolve()
+            })
+            .on('error', reject)
         })
+    }catch (err) {
+        console.clear()
+        console.log(`Erro ao baixar ${link}: ${err.message}`)
     }
 }
+
+async function main() {
+    const links = await perguntarLinks()
+
+    if (links.length === 0) {
+        console.clear()
+        console.log('Nenhum link foi fornecido')
+        return
+    }
+
+    for (let i = 0; i < links.length; i++) {
+        await baixarAudio(links[i], i)
+    }
+
+    console.log('Todos os downloads foram concluidos!')
+}
+
+main()
