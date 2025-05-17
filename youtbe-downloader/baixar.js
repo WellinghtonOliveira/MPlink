@@ -1,22 +1,20 @@
 const inquirer = require('inquirer')
 const fs = require('fs')
-const ytdl = require('ytdl-core')
-const ffmpeg = require('fluent-ffmpeg')
 const path = require('path')
-const { type } = require('os')
-const { rejects } = require('assert')
-const { resolveCaa } = require('dns')
+const { execFile } = require('child_process')
+
+const ytDlpPath = path.join(__dirname, 'bin', 'yt-dlp.exe')
 
 if (!fs.existsSync('downloads')) {
     fs.mkdirSync('downloads')
 }
 
-async function perguntarLinks() {// Perguntando quantos links são
+async function perguntarLinks() {
     const links = []
 
-    console.log('Coloque aqui quais videos mp3 deseja baixar (precione enter apos acabar)')
+    console.log('Coloque os links dos vídeos (pressione Enter em branco para finalizar):')
 
-    while(true) {
+    while (true) {
         const { link } = await inquirer.prompt([
             {
                 type: 'input',
@@ -26,9 +24,9 @@ async function perguntarLinks() {// Perguntando quantos links são
         ])
 
         if (!link.trim()) break
-        if (!ytdl.validateURL(link)) {
+        if (!link.includes('youtube.com') && !link.includes('youtu.be')) {
             console.clear()
-            console.log('Link invalido, tente novamente.')
+            console.log('Link inválido, tente novamente.')
             continue
         }
 
@@ -39,30 +37,27 @@ async function perguntarLinks() {// Perguntando quantos links são
 }
 
 async function baixarAudio(link, index) {
-    try {
-        const info = await ytdl.getInfo(link)
-        const title = info.videoDetails.title.replace(/[^\w\s]/gi, '')
-        const filePath = path.join(__dirname, 'downloads', `${index + 1} - ${title}.mp3`)
+    return new Promise((resolve, reject) => {
+        const outputPath = path.join(__dirname, 'downloads', `${index + 1} - %(title)s.%(ext)s`)
 
-        console.clear()
-        console.log(`Baixando: ${title}`)
+        console.log(`Iniciando download: ${link}`)
 
-        await new Promise((resolve, reject) => {
-            const stream = ytdl(linkSync, { quality: 'highestaudio' })
-            ffmpeg(stream)
-            .audioBitrate(192)
-            .save(filePath)
-            .on('end', () => {
-                console.clear()
-                console.log(`Finalizado: ${filePath}`)
-                resolve()
-            })
-            .on('error', reject)
+        execFile(ytDlpPath, [
+            link,
+            '--extract-audio',
+            '--audio-format', 'mp3',
+            '--ffmpeg-location', path.join(__dirname, 'bin'),
+            '-o', outputPath
+        ], (error, stdout, stderr) => {
+
+            if (error) {
+                console.log(`Erro ao baixar ${link}: ${stderr}`)
+                return reject(error)
+            }
+            console.log(`Finalizado: ${link}`)
+            resolve()
         })
-    }catch (err) {
-        console.clear()
-        console.log(`Erro ao baixar ${link}: ${err.message}`)
-    }
+    })
 }
 
 async function main() {
@@ -78,7 +73,7 @@ async function main() {
         await baixarAudio(links[i], i)
     }
 
-    console.log('Todos os downloads foram concluidos!')
+    console.log('Todos os downloads foram concluídos!')
 }
 
 main()
