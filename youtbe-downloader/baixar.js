@@ -43,7 +43,7 @@ async function baixarAudio(link, index) {
         console.log(`Iniciando download: ${link}`)
 
         execFile(ytDlpPath, [
-            link,
+            `${link}`,
             '--extract-audio',
             '--audio-format', 'mp3',
             '--ffmpeg-location', path.join(__dirname, 'bin'),
