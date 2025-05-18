@@ -1,81 +1,104 @@
-const inquirer = require('inquirer')
+const { execFile } = require('child_process')
 const fs = require('fs')
 const path = require('path')
-const { execFile } = require('child_process')
+const readline = require('readline')
 
+// Caminho do yt-dlp.exe e pasta downloads
 const ytDlpPath = path.join(__dirname, 'bin', 'yt-dlp.exe')
+const downloadsPath = path.join(__dirname, 'downloads')
 
-// Cria a pasta "downloads" se não existir
-if (!fs.existsSync('downloads')) {
-    fs.mkdirSync('downloads')
+// Cria pasta downloads se não existir
+if (!fs.existsSync(downloadsPath)) {
+  fs.mkdirSync(downloadsPath)
+  console.log('Pasta "downloads" criada')
+} else {
+  console.log('Pasta "downloads" já existe')
 }
 
-async function perguntarLinks() {
-    const links = []
-    console.log('Coloque os links dos vídeos (pressione Enter em branco para finalizar):')
+// Função para baixar áudio de um link
+function baixarAudio(url, index) {
+  return new Promise((resolve, reject) => {
+    const outputTemplate = `downloads\\${index}-%(title)s.%(ext)s`
 
-    while (true) {
-        const { link } = await inquirer.prompt([
-            {
-                type: 'input',
-                name: 'link',
-                message: `Link #${links.length + 1}:`
-            }
-        ])
+    const args = [
+      url.trim(),
+      '--extract-audio',
+      '--audio-format', 'mp3',
+      '--ffmpeg-location', path.join(__dirname, 'bin'),
+      '--restrict-filenames',
+      '-o', outputTemplate
+    ]
 
-        if (!link.trim()) break
+    console.log(`Executando comando yt-dlp para o link #${index}...`)
 
-        if (!link.includes('youtube.com') && !link.includes('youtu.be')) {
-            console.clear()
-            console.log('Link inválido, tente novamente.')
-            continue
-        }
+    execFile(ytDlpPath, args, (error, stdout, stderr) => {
+      console.log('------ Output yt-dlp ------')
+      console.log(stdout)
+      console.log('------ Erros yt-dlp ------')
+      console.log(stderr)
 
-        const linkLimpo = link.split('?')[0]
-        links.push(linkLimpo)
-    }
-
-    return links
-}
-
-async function baixarAudio(link, index) {
-    return new Promise((resolve, reject) => {
-        const outputTemplate = `${index + 1} - %(title)s.%(ext)s`
-        const outputDir = path.join(__dirname, 'downloads')
-
-        console.log(`Iniciando download: ${link}`)
-
-        execFile(ytDlpPath, [
-            link,
-            '--extract-audio',
-            '--audio-format', 'mp3',
-            '--ffmpeg-location', path.join(__dirname, 'bin'),
-            '-o', path.join(outputDir, outputTemplate) // 👈🏽 caminho correto aqui
-        ], (error, stdout, stderr) => {
-            if (error) {
-                console.log(`Erro ao baixar ${link}: ${stderr || error.message}`)
-                return reject(error)
-            }
-            console.log(`Finalizado: ${link}`)
-            resolve()
-        })
+      if (error) {
+        reject(error)
+      } else {
+        resolve()
+      }
     })
+  })
 }
 
-async function main() {
-    const links = await perguntarLinks()
+// Função para ler links do terminal
+async function lerLinks() {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  })
 
-    if (links.length === 0) {
-        console.clear()
-        console.log('Nenhum link foi fornecido')
-        return
-    }
+  const links = []
+
+  function pergunta(query) {
+    return new Promise(resolve => rl.question(query, resolve))
+  }
+
+  console.log('Coloque os links dos vídeos (pressione Enter em branco para finalizar):')
+
+  let count = 1
+  while (true) {
+    const answer = await pergunta(`? Link #${count}: `)
+    const link = answer.trim()
+
+    if (!link) break
+
+    // Limpa possíveis parâmetros depois do "?"
+    const linkLimpo = link.split('?')[0]
+    console.log(`Link limpo adicionado: ${linkLimpo}`)
+    links.push(linkLimpo)
+    count++
+  }
+
+  rl.close()
+  return links
+}
+
+// Função principal
+async function main() {
+  try {
+    const links = await lerLinks()
+    console.log(`Links coletados: ${links.length}`)
 
     for (let i = 0; i < links.length; i++) {
-        await baixarAudio(links[i], i)
+      try {
+        console.log(`[${i + 1}] Iniciando download do link: ${links[i]}`)
+        await baixarAudio(links[i], i + 1)
+        console.log(`Download do vídeo #${i + 1} concluído.`)
+      } catch (err) {
+        console.error(`Erro no download do vídeo #${i + 1}:`, err)
+      }
     }
 
     console.log('Todos os downloads foram concluídos!')
+  } catch (err) {
+    console.error('Erro geral:', err)
+  }
 }
 
 main()
