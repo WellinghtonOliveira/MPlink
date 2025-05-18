@@ -32,14 +32,18 @@ async function perguntarLinks() {
             }
         ])
 
-        if (!link.trim()) break
+                if (!link.trim()) break
+
         if (!link.includes('youtube.com') && !link.includes('youtu.be')) {
             console.clear()
             console.log('Link inválido, tente novamente.')
             continue
         }
 
-        links.push(link)
+        // Remove parâmetros extras (ex: ?si=...)
+        const linkLimpo = link.split('?')[0]
+
+        links.push(linkLimpo)
     }
 
     return links
