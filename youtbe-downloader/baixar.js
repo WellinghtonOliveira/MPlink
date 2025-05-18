@@ -3,7 +3,6 @@ const fs = require('fs')
 const path = require('path')
 const readline = require('readline')
 
-// Caminho do yt-dlp.exe e pasta downloads
 const ytDlpPath = path.join(__dirname, 'bin', 'yt-dlp.exe')
 const downloadsPath = path.join(__dirname, 'downloads')
 
@@ -15,11 +14,9 @@ if (!fs.existsSync(downloadsPath)) {
   console.log('Pasta "downloads" já existe')
 }
 
-// Função para baixar áudio de um link
 function baixarAudio(url, index) {
   return new Promise((resolve, reject) => {
     const outputTemplate = `downloads\\${index}-%(title)s.%(ext)s`
-
     const args = [
       url.trim(),
       '--extract-audio',
@@ -29,16 +26,22 @@ function baixarAudio(url, index) {
       '-o', outputTemplate
     ]
 
-    console.log(`Executando comando yt-dlp para o link #${index}...`)
-
     execFile(ytDlpPath, args, (error, stdout, stderr) => {
-      console.log('------ Output yt-dlp ------')
-      console.log(stdout)
-      console.log('------ Erros yt-dlp ------')
-      console.log(stderr)
+      // Sempre mostrar saída normal
+      process.stdout.write(stdout)
+
+      // Mostrar erros só se não for o erro que queremos ignorar
+      if (stderr && !stderr.includes('expected string or bytes-like object')) {
+        process.stderr.write(stderr)
+      }
 
       if (error) {
-        reject(error)
+        if (stderr.includes('expected string or bytes-like object')) {
+          // Ignora esse erro específico e resolve normalmente
+          resolve()
+        } else {
+          reject(error)
+        }
       } else {
         resolve()
       }
@@ -46,7 +49,6 @@ function baixarAudio(url, index) {
   })
 }
 
-// Função para ler links do terminal
 async function lerLinks() {
   const rl = readline.createInterface({
     input: process.stdin,
@@ -54,10 +56,7 @@ async function lerLinks() {
   })
 
   const links = []
-
-  function pergunta(query) {
-    return new Promise(resolve => rl.question(query, resolve))
-  }
+  const pergunta = (query) => new Promise(resolve => rl.question(query, resolve))
 
   console.log('Coloque os links dos vídeos (pressione Enter em branco para finalizar):')
 
@@ -65,10 +64,8 @@ async function lerLinks() {
   while (true) {
     const answer = await pergunta(`? Link #${count}: `)
     const link = answer.trim()
-
     if (!link) break
 
-    // Limpa possíveis parâmetros depois do "?"
     const linkLimpo = link.split('?')[0]
     console.log(`Link limpo adicionado: ${linkLimpo}`)
     links.push(linkLimpo)
@@ -79,7 +76,6 @@ async function lerLinks() {
   return links
 }
 
-// Função principal
 async function main() {
   try {
     const links = await lerLinks()
