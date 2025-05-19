@@ -12,7 +12,7 @@ O Script deve fazer o download dos links diretos
     1- yt-dlp (yt-dlp.exe)
     2- ffmpeg
 
-==> Fluxo do script cli
+==> Fluxo do script CLI
 
     1- Usuário executa o script no terminal (node baixar.js)
     2- O script pergunta um link, o usuário digita (ex: um link do YouTube)
