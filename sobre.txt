@@ -14,9 +14,9 @@ O Script deve fazer o download dos links diretos
 
 ==> Fluxo do script CLI
 
-    1- Usuário executa o script no terminal (node baixar.js)
-    2- O script pergunta um link, o usuário digita (ex: um link do YouTube)
-    3- O script pergunta o próximo link até o usuário apertar Enter vazio
-    4- O script começa a baixar cada link, convertendo para mp3 e salvando na pasta downloads
-    5- Mostra mensagens de progresso no terminal
-    6- Ao final, informa que todos os downloads foram concluídos
+    1- Usuário executa o script no terminal (node baixar.js).
+    2- O script pergunta um link, o usuário digita (ex: um link do YouTube).
+    3- O script pergunta o próximo link até o usuário apertar Enter vazio.
+    4- O script começa a baixar cada link, convertendo para mp3 e salvando na pasta downloads.
+    5- Mostra mensagens de progresso no terminal.
+    6- Ao final, informa que todos os downloads foram concluídos.
