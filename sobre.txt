@@ -3,14 +3,14 @@ O Script deve fazer o download dos links diretos
 
 ==> Bibliotecas usadas
 
-    1- inquirer
-    2- fs
-    3- path
-    4- child_process (método execFile)
+    1- inquirer.
+    2- fs.
+    3- path.
+    4- child_process (método execFile).
 
 ==> Programas externos
-    1- yt-dlp (yt-dlp.exe)
-    2- ffmpeg
+    1- yt-dlp (yt-dlp.exe).
+    2- ffmpeg.
 
 ==> Fluxo do script CLI
 
