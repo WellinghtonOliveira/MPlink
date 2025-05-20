@@ -16,7 +16,7 @@ if (!fs.existsSync(downloadsPath)) {
 
 function baixarAudio(url, index) {
   return new Promise((resolve, reject) => {
-    const outputTemplate = `downloads\\${index}-%(title)s.%(ext)s`
+    const outputTemplate = path.join('downloads', `${index}-%(title)s.%(ext)s`)
     const args = [
       url.trim(),
       '--extract-audio',
@@ -27,17 +27,14 @@ function baixarAudio(url, index) {
     ]
 
     execFile(ytDlpPath, args, (error, stdout, stderr) => {
-      // Sempre mostrar saída normal
       process.stdout.write(stdout)
 
-      // Mostrar erros só se não for o erro que queremos ignorar
       if (stderr && !stderr.includes('expected string or bytes-like object')) {
         process.stderr.write(stderr)
       }
 
       if (error) {
-        if (stderr.includes('expected string or bytes-like object')) {
-          // Ignora esse erro específico e resolve normalmente
+        if (stderr && stderr.includes('expected string or bytes-like object')) {
           resolve()
         } else {
           reject(error)
@@ -66,9 +63,9 @@ async function lerLinks() {
     const link = answer.trim()
     if (!link) break
 
-    const linkLimpo = link.split('?')[0]
-    console.log(`Link limpo adicionado: ${linkLimpo}`)
-    links.push(linkLimpo)
+    // Não limpar o link para evitar perda de parâmetros importantes
+    console.log(`Link adicionado: ${link}`)
+    links.push(link)
     count++
   }
 
@@ -87,13 +84,13 @@ async function main() {
         await baixarAudio(links[i], i + 1)
         console.log(`Download do vídeo #${i + 1} concluído.`)
       } catch (err) {
-        console.error(`Erro no download do vídeo #${i + 1}:`, err)
+        console.error(`Erro no download do vídeo #${i + 1}:`, err.message || err)
       }
     }
 
     console.log('Todos os downloads foram concluídos!')
   } catch (err) {
-    console.error('Erro geral:', err)
+    console.error('Erro geral:', err.message || err)
   }
 }
 
