@@ -1,4 +1,4 @@
-O Script deve fazer o download dos links diretos
+O Script deve fazer o download dos links diretos.
 
 
 ==> Bibliotecas usadas
