@@ -2,7 +2,9 @@
   "name": "youtbe-downloader",
   "version": "1.0.0",
   "main": "index.js",
+  "bin": "baixar.js",
   "scripts": {
+    "start": "node baixar.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
