@@ -5,8 +5,9 @@ const fs = require('fs')
 const path = require('path')
 const readline = require('readline')
 
-const ytDlpPath = path.join(__dirname, 'bin', 'yt-dlp.exe')
-const downloadsPath = path.join(__dirname, 'downloads')
+const basePath = path.dirname(process.execPath)
+const ytDlpPath = path.join(basePath, 'bin', 'yt-dlp.exe')
+const downloadsPath = path.join(basePath, 'downloads')
 
 // Cria pasta downloads se não existir
 if (!fs.existsSync(downloadsPath)) {
