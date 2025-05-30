@@ -20,5 +20,3 @@ O Script deve fazer o download dos links diretos.
     4- O script começa a baixar cada link, convertendo para mp3 e salvando na pasta downloads.
     5- Mostra mensagens de progresso no terminal.
     6- Ao final, informa que todos os downloads foram concluídos.
-
-    //TODO converter para exe
