@@ -22,4 +22,5 @@ O Script deve fazer o download dos links diretos.
     6- Ao final, informa que todos os downloads foram concluídos.
 
 
-//TODO lembrar de passar para executavel
+TODO lembrar de passar para executavel
+TODO colocar em uma promisse ao enviar o espaço vazio e ele nao encontrar link
