@@ -5,7 +5,7 @@ const fs = require('fs')
 const path = require('path')
 const readline = require('readline')
 
-const basePath = path.dirname(process.execPath)
+const basePath = __dirname
 const ytDlpPath = path.join(basePath, 'bin', 'yt-dlp.exe')
 const downloadsPath = path.join(basePath, 'downloads')
 
