@@ -1,46 +1,59 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-<head>
 
+<head>
     <link rel="stylesheet" href="./CSS/styles.css">
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MP3Downloader</title>
 </head>
-<body>
-    <div class="container">
 
+<body>
+    <div class="container page-wrapper">
         <nav>
             <div class="logo">MP3 <span>Downloader</span></div>
             <div class="nav-links">
                 <ul>
-                    <li>Inicio</li>
-                    <li>Como usar</li>
-                    <li>Sobre</li>
+                    <li><a href="#">Inicio</a></li>
+                    <li><a href="#">Como usar</a></li>
+                    <li><a href="#">Sobre</a></li>
                 </ul>
             </div>
         </nav>
 
-        <header>
-            <h1>Converta vídeos em MP3</h1>
-            <p>Cole o link do video abaixo e baixe o áudio em alta qualidade</p>
-        
-            <div class="cont-header">
-                <input type="text">
-                <button>Converter</button>
+        <main>
+            <header>
+                <h1>Converta vídeos em MP3</h1>
+                <p>Cole o link do video abaixo e baixe o áudio em alta qualidade</p>
+
+                <div class="cont-header">
+                    <input type="text" placeholder="Cole o link aqui:">
+                    <button>Converter</button>
+                </div>
+            </header>
+            <div class="container-baixados">
+                <h2>Baixados</h2>
+                <div class="div-baixados">
+                    <ul>
+                        <li> --- </li>
+                        <li> --- </li>
+                        <li> --- </li>
+                        <li> --- </li>
+                        <li> --- </li>
+                        <li> --- </li>
+                    </ul>
+                </div>
             </div>
-        </header>
-    
-        <div>
-            <h2>Baixados</h2>
-            <div></div>
-        </div>
+        </main>
 
-        <footer>rodapé</footer>
+        <footer>
+            <div>
+                <h4>MP3 <span>Downloader</span></h4>
+            </div>
+        </footer>
     </div>
-
-
     <script src="./JS/script.js"></script>
 </body>
+
 </html>
