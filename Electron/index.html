@@ -28,19 +28,24 @@
                 <p>Cole o link do video abaixo e baixe o áudio em alta qualidade</p>
 
                 <div class="cont-header">
-                    <input type="text" placeholder="Cole o link aqui:">
-                    <button>Converter</button>
+                    <input id="input-link" type="text" placeholder="Cole o link aqui:">
+                    <button id="button-convert">Converter</button>
                 </div>
             </header>
+
+            <div class="container-baixando">
+                <h2>Baixando</h2>
+                <div class="div-baixando">
+                    <ul>
+                        <li id="log"> --- </li>
+                    </ul>
+                </div>
+            </div>
+
             <div class="container-baixados">
                 <h2>Baixados</h2>
                 <div class="div-baixados">
                     <ul>
-                        <li> --- </li>
-                        <li> --- </li>
-                        <li> --- </li>
-                        <li> --- </li>
-                        <li> --- </li>
                         <li> --- </li>
                     </ul>
                 </div>
@@ -53,7 +58,7 @@
             </div>
         </footer>
     </div>
-    <script src="./JS/script.js"></script>
+    <script src="./src/renderer.js"></script>
 </body>
 
 </html>
