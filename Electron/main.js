@@ -24,11 +24,30 @@ app.whenReady().then(() => {
   createWindow()
 })
 
+ipcMain.handle('extrair-titulo', async (event, url) => {
+  return new Promise((resolve, reject) => {
+    const args = ['--dump-json', url.trim()]
+
+    execFile(ytDlpPath, args, (error, stdout, stderr) => {
+      if (error) {
+        reject(stderr || error.message)
+        return
+      }
+
+      try {
+        const info = JSON.parse(stdout)
+        resolve(info.title)
+      } catch (e) {
+        reject('Erro ao interpretar JSON: ' + e.message)
+      }
+    })
+  })
+})
+
 ipcMain.handle('baixar-audio', async (event, url, index) => {
   return new Promise((resolve, reject) => {
-    const ytDlpPath = path.join(__dirname, 'bin', 'yt-dlp.exe')
     const ffmpegPath = path.join(__dirname, 'bin')
-    const outputTemplate = path.join(__dirname, 'downloads', `${index}-%(title)s.%(ext)s`)
+    const outputTemplate = path.join(downloadsPath, `${index}-%(title)s.%(ext)s`)
 
     const args = [
       url.trim(),
