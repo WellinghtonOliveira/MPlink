@@ -1,54 +1,90 @@
 const urlInput = document.getElementById('input-link')
+const quantiaBaixados = document.getElementById("quantia-baixados")
 const downloadBtn = document.getElementById('button-convert')
-const log = document.getElementById('log')
-const listaBainxando = document.getElementById("lista-baixando")
+const listaBaixando = document.getElementById("lista-baixando")
 const listaBaixados = document.getElementById("lista-baixados")
-let i = 0   
+const log = document.getElementById('log')
+const carregandoBaixando = document.getElementById("carregamento-baixando")
+const carregandoBaixados = document.getElementById("carregamento-baixados")
+const arrayPontos = ['', '.', '..', '...']
+
+let loadingInterval = null
+let pontosIndex = 0
 
 downloadBtn.addEventListener('click', async () => {
-  let url = urlInput.value.trim()
+  let separador = urlInput.value.trim()
 
   urlInput.value = ""
-  
-  if (!url) {
-    addBaixando(i)
-    i++
-    //log.textContent += '\n[Erro] Link vazio'
+
+  if (!separador) {
+    log.textContent += '\n[Erro] Link vazio'
     return
   }
 
-  exBaixando(toString(urlInput))
+  let i = 0
+  let url = []
+  url.push(separador.split('?')[0])
+  addBaixando(url[i])
+  exBaixando(" --- ")
 
-  url = url.split('?')[0]
+  loadBaixando()
 
-  //log.textContent += `\n[Iniciando download] ${url}`
-  try {
-    const titulo = await window.api.extrairTitulo(url)
-    log.textContent = titulo
+  for (i = 0; i < url.length; i++) {
+    try {
+      const titulo = await window.api.extrairTitulo(url[i])
+      addBaixando(titulo)
 
-    const resposta = await window.api.baixarAudio(url, 1)
-    //log.textContent += `\n[Sucesso] ${resposta}`
-  } catch (err) {
-    //log.textContent += `\n[Erro] ${err}`
+      await window.api.baixarAudio(url[i], 1)
+      exBaixando(titulo)
+      addBaixados(titulo)
+      stopBaixando()
+    } catch (err) {
+      log.textContent = `\n[Erro] ${err}`
+      stopBaixando()
+    }
   }
 })
 
 function addBaixando(titulo) {
   const novoElementoMusica = document.createElement("li")
   novoElementoMusica.textContent = titulo
-  listaBainxando.appendChild(novoElementoMusica)
+  listaBaixando.appendChild(novoElementoMusica)
 }
 
-function addBaixados() {
+function addBaixados(titulo) {
+  const ex = document.getElementById("ex")
+  const novoElementoMusica = document.createElement("li")
+  novoElementoMusica.textContent = titulo
 
+  if (ex) ex.remove()
+
+  listaBaixados.appendChild(novoElementoMusica)
+  quantiaBaixados.textContent = listaBaixados.children.length
 }
 
 function exBaixando(titulo) {
-  let nomeFilhoLi = listaBainxando.querySelectorAll("li")
+  let nomeFilhoLi = listaBaixando.querySelectorAll("li")
 
   nomeFilhoLi.forEach((el) => {
     if (el.textContent == titulo) {
-      listaBainxando.removeChild(el)
+      listaBaixando.removeChild(el)
     }
   })
+}
+
+function loadBaixando() {
+  if (loadingInterval) return
+
+  pontosIndex = 0
+
+  loadingInterval = setInterval(() => {
+    carregandoBaixando.textContent = `Baixando${arrayPontos[pontosIndex]}`
+    pontosIndex = (pontosIndex + 1) % arrayPontos.length
+  }, 500)
+}
+
+function stopBaixando() {
+  clearInterval(loadingInterval)
+  loadingInterval = null
+  carregandoBaixando.textContent = 'Baixando'
 }
