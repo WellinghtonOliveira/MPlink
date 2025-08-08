@@ -88,3 +88,7 @@ function stopBaixando() {
   loadingInterval = null
   carregandoBaixando.textContent = 'Baixando'
 }
+
+
+
+// TODO compilar o arquivo mais tarde
