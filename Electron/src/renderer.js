@@ -5,50 +5,79 @@ const listaBaixando = document.getElementById("lista-baixando")
 const listaBaixados = document.getElementById("lista-baixados")
 const log = document.getElementById('log')
 const carregandoBaixando = document.getElementById("carregamento-baixando")
-const carregandoBaixados = document.getElementById("carregamento-baixados")
 const arrayPontos = ['', '.', '..', '...']
 
 let loadingInterval = null
 let pontosIndex = 0
+let fila = [] // fila de links para baixar
+let baixandoAgora = false
 
-downloadBtn.addEventListener('click', async () => {
-  let separador = urlInput.value.trim()
-
+downloadBtn.addEventListener('click', () => {
+  const entrada = urlInput.value.trim()
   urlInput.value = ""
 
-  if (!separador) {
+  if (!entrada) {
     log.textContent += '\n[Erro] Link vazio'
     return
   }
 
-  let i = 0
-  let url = []
-  url.push(separador.split('?')[0])
-  addBaixando(url[i])
-  exBaixando(" --- ")
+  // Aceita múltiplos links separados por espaço ou quebra de linha
+  const novosLinks = entrada.split(/\s+|\n+/).map(link => link.split('?')[0]).filter(Boolean)
 
-  loadBaixando()
+  // Adiciona na fila e mostra na lista de baixando
+  novosLinks.forEach(link => {
+    fila.push(link)
+    addBaixando(link) // já mostra o link imediatamente
+  })
 
-  for (i = 0; i < url.length; i++) {
-    try {
-      const titulo = await window.api.extrairTitulo(url[i])
-      addBaixando(titulo)
-
-      await window.api.baixarAudio(url[i], 1)
-      exBaixando(titulo)
-      addBaixados(titulo)
-      stopBaixando()
-    } catch (err) {
-      log.textContent = `\n[Erro] ${err}`
-      stopBaixando()
-    }
+  // Se não está baixando, começa
+  if (!baixandoAgora) {
+    processarFila()
   }
 })
 
-function addBaixando(titulo) {
+async function processarFila() {
+  if (fila.length === 0) {
+    stopBaixando()
+    return
+  }
+
+  baixandoAgora = true
+  loadBaixando()
+
+  const link = fila.shift()
+
+  try {
+    const titulo = await window.api.extrairTitulo(link)
+
+    // Atualiza o link na lista "Baixando" para o título real
+    atualizarBaixando(link, titulo)
+
+    await window.api.baixarAudio(link, 1)
+
+    exBaixando(titulo)
+    addBaixados(titulo)
+  } catch (err) {
+    log.textContent += `\n[Erro] ${err}`
+    exBaixando(link)
+  }
+
+  processarFila()
+}
+
+function addBaixando(texto) {
   const novoElementoMusica = document.createElement("li")
-  novoElementoMusica.textContent = titulo
+  novoElementoMusica.textContent = texto
   listaBaixando.appendChild(novoElementoMusica)
+}
+
+function atualizarBaixando(antigo, novo) {
+  const itens = listaBaixando.querySelectorAll("li")
+  itens.forEach(el => {
+    if (el.textContent === antigo) {
+      el.textContent = novo
+    }
+  })
 }
 
 function addBaixados(titulo) {
@@ -64,19 +93,22 @@ function addBaixados(titulo) {
 
 function exBaixando(titulo) {
   let nomeFilhoLi = listaBaixando.querySelectorAll("li")
-
   nomeFilhoLi.forEach((el) => {
-    if (el.textContent == titulo) {
+    if (el.textContent === titulo) {
       listaBaixando.removeChild(el)
     }
   })
+
+  if (listaBaixando.children.length === 0) {
+    stopBaixando()
+    baixandoAgora = false
+  }
 }
 
 function loadBaixando() {
   if (loadingInterval) return
 
   pontosIndex = 0
-
   loadingInterval = setInterval(() => {
     carregandoBaixando.textContent = `Baixando${arrayPontos[pontosIndex]}`
     pontosIndex = (pontosIndex + 1) % arrayPontos.length
@@ -88,7 +120,3 @@ function stopBaixando() {
   loadingInterval = null
   carregandoBaixando.textContent = 'Baixando'
 }
-
-
-
-// TODO compilar o arquivo mais tarde
