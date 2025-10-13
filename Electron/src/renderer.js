@@ -14,7 +14,7 @@ let baixandoAgora = false
 
 downloadBtn.addEventListener('click', () => {
   const entrada = urlInput.value.trim()
-  urlInput.value = ""
+  urlInput.value = "" 
 
   if (!entrada) {
     log.textContent += '\n[Erro] Link vazio'
