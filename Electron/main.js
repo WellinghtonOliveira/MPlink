@@ -13,22 +13,24 @@ function createWindow() {
     width: 800,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, 'preload.js'),
+      contextIsolation: true, // importante
+      nodeIntegration: false, // segurança
+      enableRemoteModule: false
     }
   })
 
   win.loadFile('index.html')
 }
 
-app.whenReady().then(() => {
-  createWindow()
-})
+app.whenReady().then(createWindow)
 
+// Extrai o título do vídeo
 ipcMain.handle('extrair-titulo', async (event, url) => {
   return new Promise((resolve, reject) => {
     const args = ['--dump-json', url.trim()]
 
-    execFile(ytDlpPath, args, (error, stdout, stderr) => {
+    execFile(ytDlpPath, args, { windowsHide: true }, (error, stdout, stderr) => {
       if (error) {
         reject(stderr || error.message)
         return
@@ -44,10 +46,11 @@ ipcMain.handle('extrair-titulo', async (event, url) => {
   })
 })
 
-ipcMain.handle('baixar-audio', async (event, url, index) => {
+// Faz o download do áudio (com Promise controlada)
+ipcMain.handle('baixar-audio', async (event, { url, qualidade }) => {
   return new Promise((resolve, reject) => {
     const ffmpegPath = path.join(__dirname, 'bin')
-    const outputTemplate = path.join(downloadsPath, `${index}-%(title)s.%(ext)s`)
+    const outputTemplate = path.join(downloadsPath, `%(title)s.%(ext)s`)
 
     const args = [
       url.trim(),
@@ -61,16 +64,26 @@ ipcMain.handle('baixar-audio', async (event, url, index) => {
     console.log('\n[DEBUG] yt-dlp path:', ytDlpPath)
     console.log('[DEBUG] args:', args)
 
-    execFile(ytDlpPath, args, (error, stdout, stderr) => {
-      if (error) {
-        reject(stderr || error.message)
-        return
-      }
+    const processo = execFile(ytDlpPath, args, { windowsHide: true })
 
-      if (stderr) console.error('[stderr]', stderr)
-      if (stdout) console.log('[stdout]', stdout)
+    let saida = ''
 
-      resolve(stdout)
+    processo.stdout.on('data', data => {
+      saida += data.toString()
     })
+
+    processo.stderr.on('data', data => {
+      console.log('[yt-dlp stderr]', data.toString())
+    })
+
+    processo.on('close', code => {
+      if (code === 0) {
+        resolve(saida)
+      } else {
+        reject(`yt-dlp finalizou com código ${code}`)
+      }
+    })
+
+    processo.on('error', err => reject(err))
   })
 })
